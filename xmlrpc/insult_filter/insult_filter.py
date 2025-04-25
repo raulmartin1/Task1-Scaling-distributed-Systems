@@ -4,20 +4,25 @@ class InsultFilter:
     def __init__(self):
         self.filtered_texts = []
 
+    # Método para filtrar insultos en un texto
     def filter_insults(self, text, insults):
         for insult in insults:
-            text = text.replace(insult, "CENSORED")
+            text = text.replace(insult, "CENSURADO")
         self.filtered_texts.append(text)
         return text
 
+    # Método para obtener los textos filtrados
     def get_filtered_texts(self):
         return self.filtered_texts
 
-def run_server():
+# Función para ejecutar el servidor de InsultFilter
+def run_filter_server():
     server = xmlrpc.server.SimpleXMLRPCServer(("localhost", 8001))
-    service = InsultFilter()
-    server.register_instance(service)
+    filter_service = InsultFilter()
+    server.register_instance(filter_service)
+    print("InsultFilter está funcionando en el puerto 8001...")
     server.serve_forever()
 
 if __name__ == "__main__":
-    run_server()
+    # Ejecutar el servidor de InsultFilter
+    run_filter_server()

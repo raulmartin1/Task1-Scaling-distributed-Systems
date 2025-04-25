@@ -1,40 +1,49 @@
 import xmlrpc.server
-import threading
 import random
-import time
+import threading
 
 class InsultService:
     def __init__(self):
-        self.insults = []
+        self.insults = [
+            "tonto", "idiota", "estúpido", "imbécil", "bobo", 
+            "cabeza de chorlito", "morón", "burro", "papanatas", 
+            "pelmazo", "torpe", "bestia", "bruto", "tonto el culo"
+        ]
         self.subscribers = []
 
+    # Método para añadir un insulto
     def add_insult(self, insult):
         if insult not in self.insults:
             self.insults.append(insult)
+            # Notificar a los suscriptores cuando se agrega un nuevo insulto
+            for subscriber in self.subscribers:
+                subscriber.notify(insult)
             return True
         return False
 
+    # Método para obtener la lista de insultos
     def get_insults(self):
         return self.insults
 
-    def subscribe(self, subscriber):
+    # Método para obtener un insulto aleatorio
+    def insult_me(self):
+        if self.insults:
+            return random.choice(self.insults)
+        return "No hay insultos disponibles."
+
+    # Método para registrar nuevos suscriptores
+    def add_subscriber(self, subscriber):
         self.subscribers.append(subscriber)
         return True
 
-    def broadcast_insults(self):
-        while True:
-            if self.subscribers:
-                insult = random.choice(self.insults)
-                for subscriber in self.subscribers:
-                    subscriber.notify(insult)
-            time.sleep(5)
-
-def run_server():
+# Función para ejecutar el servidor de InsultService
+def run_insult_server():
     server = xmlrpc.server.SimpleXMLRPCServer(("localhost", 8000))
-    service = InsultService()
-    server.register_instance(service)
-    threading.Thread(target=service.broadcast_insults).start()
+    insult_service = InsultService()
+    server.register_instance(insult_service)
+    print("InsultService está funcionando en el puerto 8000...")
     server.serve_forever()
 
 if __name__ == "__main__":
-    run_server()
+    # Ejecutar el servidor de InsultService
+    run_insult_server()
