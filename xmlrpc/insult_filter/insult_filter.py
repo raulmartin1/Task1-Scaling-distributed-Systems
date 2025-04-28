@@ -1,4 +1,5 @@
 import xmlrpc.server
+import time
 
 class InsultFilter:
     def __init__(self):
@@ -6,9 +7,11 @@ class InsultFilter:
 
     # Método para filtrar insultos en un texto
     def filter_insults(self, text, insults):
+        print(f"InsultFilter: Filtrando el texto '{text}'...")
         for insult in insults:
             text = text.replace(insult, "CENSURADO")
         self.filtered_texts.append(text)
+        print(f"InsultFilter: Texto filtrado: {text}")
         return text
 
     # Método para obtener los textos filtrados

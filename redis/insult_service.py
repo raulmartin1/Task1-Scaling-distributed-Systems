@@ -8,7 +8,7 @@ list_name = "INSULTS"
 # Funcio per rebre insults i publicar-los al canal
 def insult_server():
     while True:
-        insult = client.lpop(list_name) # agafa insult de la llista
+        insult = client.rpop(list_name) # agafa insult de la llista
         if insult :
             client.publish(channel_name, insult)    # publiquem insult al canal
             print(f"InsultService: Insult '{insult}' published")

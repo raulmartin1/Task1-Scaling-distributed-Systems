@@ -18,6 +18,7 @@ class InsultService:
             # Notificar a los suscriptores cuando se agrega un nuevo insulto
             for subscriber in self.subscribers:
                 subscriber.notify(insult)
+            print(f"InsultService: Insulto '{insult}' agregado.")
             return True
         return False
 
@@ -34,6 +35,7 @@ class InsultService:
     # Método para registrar nuevos suscriptores
     def add_subscriber(self, subscriber):
         self.subscribers.append(subscriber)
+        print(f"InsultService: Nuevo suscriptor agregado.")
         return True
 
 # Función para ejecutar el servidor de InsultService
