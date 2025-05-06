@@ -18,14 +18,16 @@ class InsultFilter:
     def get_filtered_texts(self):
         return self.filtered_texts
 
-# Función para ejecutar el servidor de InsultFilter
+# Función para ejecutar el servidor de InsultFilter con hilos
 def run_filter_server():
     server = xmlrpc.server.SimpleXMLRPCServer(("localhost", 8001))
     filter_service = InsultFilter()
     server.register_instance(filter_service)
     print("InsultFilter está funcionando en el puerto 8001...")
-    server.serve_forever()
+    
+    # Ejecutar el servidor en un hilo
+    server_thread = threading.Thread(target=server.serve_forever)
+    server_thread.start()
 
 if __name__ == "__main__":
-    # Ejecutar el servidor de InsultFilter
     run_filter_server()

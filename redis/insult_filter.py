@@ -4,8 +4,13 @@ import time
 client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
 
 queue_name = "insult_queue"
-list_name = "INSULTS"
+result_list = "filtered_texts"
 censored_words = ["tonto", "bobo", "tortuga"]
+
+def filter_text(text):
+    words = text.split()
+    filtered = ["CENSORED" if w.lower() in censored_words else w for w in words]
+    return " ".join(filtered)
 
 # Funcio que filtra els imsults i els emmagatzema
 def insult_filter():
@@ -13,16 +18,15 @@ def insult_filter():
     while True:
         task = client.blpop(queue_name, timeout=0) # Espera insult
         if task:
-            insult = task[1]
+            insult_text = task[1]
+            filtered_text = filter_text(insult_text)
 
-            if insult.lower() in censored_words:    # Si es troba a la llista de censura es censura
-                insult = "CENSORED"
-            
-            if not client.sismember(list_name, insult): # Afegir a la llista si no ha estat afegit (Evitar diplicats)
-                client.rpush(list_name, insult)
-                print(f"InsultFilter: Insult '{insult}' agreagat")
+            if filtered_text not in client.lrange(result_list, 0, -1):
+                client.rpush(result_list, filtered_text)
+                print(f"InsultFilter: Text filtrat agregat: '{filtered_text}'")
             else:
-                print(f"InsultFilter: Insult '{insult}' ja es troba a la llista")
+                print(f"InsultFilter: Text filtrat '{filtered_text}' ja es troba a la llista")
+            
         time.sleep(1)
 
 if __name__ == "__main__":

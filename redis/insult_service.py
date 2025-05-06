@@ -1,3 +1,4 @@
+import random
 import redis
 import time
 
@@ -8,9 +9,9 @@ list_name = "INSULTS"
 # Funcio per rebre insults i publicar-los al canal
 def insult_server():
     while True:
-        insult = client.rpop(list_name) # agafa insult de la llista
-        if insult :
-            client.publish(channel_name, insult)    # publiquem insult al canal
+        insult = client.spop(list_name)
+        if insult:
+            client.publish(channel_name, insult)
             print(f"InsultService: Insult '{insult}' published")
         else:
             print(f"InsultService: No hi ha insults a publicar")
