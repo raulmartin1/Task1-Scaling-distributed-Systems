@@ -1,5 +1,4 @@
 import xmlrpc.server
-import time
 
 class InsultFilter:
     def __init__(self):
@@ -18,16 +17,19 @@ class InsultFilter:
     def get_filtered_texts(self):
         return self.filtered_texts
 
-# Función para ejecutar el servidor de InsultFilter con hilos
+    # Método de notificación (como suscriptor)
+    def notify(self, insult):
+        print(f"InsultFilter ha recibido un nuevo insulto: {insult}")
+        # Filtra y procesa el insulto
+        self.filter_insults(f"Eres un {insult}", [insult])
+
+# Función para ejecutar el servidor de InsultFilter
 def run_filter_server():
     server = xmlrpc.server.SimpleXMLRPCServer(("localhost", 8001))
     filter_service = InsultFilter()
     server.register_instance(filter_service)
     print("InsultFilter está funcionando en el puerto 8001...")
-    
-    # Ejecutar el servidor en un hilo
-    server_thread = threading.Thread(target=server.serve_forever)
-    server_thread.start()
+    server.serve_forever()
 
 if __name__ == "__main__":
     run_filter_server()
