@@ -18,13 +18,22 @@ class InsultFilter:
     def get_filtered_texts(self):
         return self.filtered_texts
 
-def run_server():
-    Pyro4.Daemon.serveSimple(
-        {
-            InsultFilter: "example.insultfilter"
-        },
-        ns=False, port=9091
-    )
+    # Método de notificación (como suscriptor)
+    def notify(self, insult):
+        print(f"InsultFilter ha recibido un nuevo insulto: {insult}")
+        # Filtra y procesa el insulto
+        self.filter_insults(f"Eres un {insult}", [insult])
+
+# Función para ejecutar el servidor de InsultFilter
+def run_filter_server():
+    daemon = Pyro4.Daemon()  # Crear el Daemon de Pyro
+    ns = Pyro4.locateNS()  # Localizar el Name Server de Pyro
+    filter_service = InsultFilter()
+    uri = daemon.register(filter_service)  # Registrar InsultFilter
+    ns.register("example.insultfilter", uri)  # Registrar en el Name Server con un nombre único
+
+    print("InsultFilter está funcionando...")
+    daemon.requestLoop()  # Mantener el servidor funcionando y esperando solicitudes
 
 if __name__ == "__main__":
-    run_server()
+    run_filter_server()
