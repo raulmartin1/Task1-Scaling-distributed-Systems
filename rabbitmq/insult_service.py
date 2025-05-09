@@ -14,6 +14,8 @@ list_name = "INSULTS"
 insults = ["tonto", "bobo", "tortuga", "eres tonto", "eres muy bobo", "eres una tortuga"]
 
 def insult_server():
+    print("InsultService: Publishing random insults every 5 seconds...")
+
     while True:
         insult = random.choice(insults)
         # Enviamos el insulto a la cola

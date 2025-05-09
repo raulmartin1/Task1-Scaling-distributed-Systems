@@ -23,11 +23,10 @@ def callback(ch, method, properties, body):
     if insult_text not in unfiltered_insults:
         unfiltered_insults.append(insult_text)
 
-    filtered_text = filter_text(insult_text)
+        filtered_text = filter_text(insult_text)
 
-    if insult_text not in unfiltered_insults:
         filtered_texts.append(filtered_text)
-        print(f"InsultFilter: Text filtrat afegit: '{insult_text}'")
+        print(f"InsultFilter: Text filtrat afegit: '{filtered_text}' -> Sense filtrar: '{insult_text}'")
     else:
         print(f"InsultFilter: El text filtrat ja es troba a la llista: '{insult_text}'")
 
