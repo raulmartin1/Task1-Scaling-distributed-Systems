@@ -19,15 +19,20 @@ def filter_text(text):
 
 def callback(ch, method, properties, body):    
     insult_text = body.decode()
+
+    if insult_text not in unfiltered_insults:
+        unfiltered_insults.append(insult_text)
+
     filtered_text = filter_text(insult_text)
 
-    if filtered_text not in filtered_texts:
+    if insult_text not in unfiltered_insults:
         filtered_texts.append(filtered_text)
-        print(f"InsultFilter: Text filtrat afegit: '{filtered_text}'")
+        print(f"InsultFilter: Text filtrat afegit: '{insult_text}'")
     else:
-        print(f"InsultFilter: El text filtrat ja es troba a la llista: '{filtered_text}'")
+        print(f"InsultFilter: El text filtrat ja es troba a la llista: '{insult_text}'")
 
 filtered_texts = []
+unfiltered_insults = [] # Para comprobar si ya se han metido en la lista
 
 def insult_filter():
     channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)

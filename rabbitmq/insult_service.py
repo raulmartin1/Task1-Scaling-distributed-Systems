@@ -11,10 +11,11 @@ queue_name = 'insult_queue'
 channel.queue_declare(queue=queue_name)
 
 list_name = "INSULTS"
+insults = ["tonto", "bobo", "tortuga", "eres tonto", "eres muy bobo", "eres una tortuga"]
 
 def insult_server():
     while True:
-        insult = random.choice(["tonto", "bobo", "tortuga"])
+        insult = random.choice(insults)
         # Enviamos el insulto a la cola
         channel.basic_publish(exchange='',
                               routing_key=queue_name,
