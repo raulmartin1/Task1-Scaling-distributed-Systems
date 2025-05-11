@@ -25,7 +25,7 @@ class InsultFilter:
 
 # Función para ejecutar el servidor de InsultFilter
 def run_filter_server():
-    server = xmlrpc.server.SimpleXMLRPCServer(("localhost", 8001))
+    server = xmlrpc.server.SimpleXMLRPCServer(("localhost", 8001), allow_none=True)  # Habilitar None
     filter_service = InsultFilter()
     server.register_instance(filter_service)
     print("InsultFilter está funcionando en el puerto 8001...")
