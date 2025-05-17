@@ -1,51 +1,86 @@
 import Pyro4
+import random
+import threading
+import time
+from multiprocessing import Process
 
 @Pyro4.expose
 class InsultService:
     def __init__(self):
-        self.insults = [
-            "tonto", "idiota", "estúpido", "imbécil", "bobo", 
-            "burro", "papanatas", "pelmazo", "torpe", 
-            "bestia", "bruto"
-        ]
-        self.subscribers = []  # Lista de suscriptores (servidores que se suscriben)
+        self.insults = []
+        self.subscribers = []
+        self.lock = threading.Lock()
+        threading.Thread(target=self.broadcast_insults, daemon=True).start()
 
-    # Método para añadir un insulto
     def add_insult(self, insult):
-        if insult not in self.insults:
-            self.insults.append(insult)
-            # Notificar a todos los suscriptores cuando se agrega un nuevo insulto
-            for subscriber_uri in self.subscribers:
-                subscriber = Pyro4.Proxy(subscriber_uri)  # Proxy al suscriptor
-                subscriber.notify(insult)  # Notificar al suscriptor
-            print(f"InsultService: Insulto '{insult}' agregado y notificado a suscriptores.")
-            return True
-        print(f"InsultService: El insulto '{insult}' ya está en la lista.")
-        return False  # El insulto ya estaba en la lista
+        with self.lock:
+            if insult not in self.insults:
+                self.insults.append(insult)
+                print(f"InsultService: Insulto '{insult}' agregado.")
+                return True
+            print(f"InsultService: El insulto '{insult}' ya está en la lista.")
+            return False
 
-    # Método para obtener la lista de insultos
     def get_insults(self):
-        return self.insults
+        with self.lock:
+            return self.insults.copy()
 
-    # Método para registrar nuevos suscriptores
-    def add_subscriber(self, subscriber_uri):
-        if subscriber_uri not in self.subscribers:
-            self.subscribers.append(subscriber_uri)
-            print(f"InsultService: Nuevo suscriptor registrado.")
+    def clear_insults(self):
+        with self.lock:
+            self.insults.clear()
+            print("InsultService: Lista de insultos limpia.")
             return True
-        print(f"InsultService: El suscriptor ya está registrado.")
-        return False
 
-# Función para ejecutar el servidor de InsultService
+    def add_subscriber(self, subscriber_uri):
+        with self.lock:
+            try:
+                subscriber_proxy = Pyro4.Proxy(subscriber_uri)  # Convertir URI a proxy
+                if subscriber_proxy not in self.subscribers:
+                    self.subscribers.append(subscriber_proxy)
+                    print(f"InsultService: Nuevo suscriptor registrado.")
+                    return True
+                print(f"InsultService: El suscriptor ya está registrado.")
+                return False
+            except Exception as e:
+                print(f"InsultService: Error al añadir suscriptor: {e}")
+                return False
+
+    def remove_subscriber(self, subscriber_uri):
+        with self.lock:
+            try:
+                subscriber_proxy = Pyro4.Proxy(subscriber_uri)
+                if subscriber_proxy in self.subscribers:
+                    self.subscribers.remove(subscriber_proxy)
+                    print(f"InsultService: Suscriptor eliminado.")
+                    return True
+                print(f"InsultService: El suscriptor no está registrado.")
+                return False
+            except Exception as e:
+                print(f"InsultService: Error al eliminar suscriptor: {e}")
+                return False
+
+    def broadcast_insults(self):
+        while True:
+            with self.lock:
+                if self.insults and self.subscribers:
+                    insult = random.choice(self.insults)
+                    for subscriber in self.subscribers[:]:
+                        try:
+                            subscriber.notify(insult)
+                            print(f"InsultService: Insulto '{insult}' enviado a suscriptor.")
+                        except Exception as e:
+                            print(f"InsultService: Error notificando a suscriptor: {e}")
+                            self.subscribers.remove(subscriber)
+            time.sleep(5)
+
 def run_insult_server():
-    daemon = Pyro4.Daemon()  # Crear el Daemon de Pyro
-    ns = Pyro4.locateNS()  # Localizar el Name Server de Pyro
+    daemon = Pyro4.Daemon(host="localhost", port=9093)
+    ns = Pyro4.locateNS()
     insult_service = InsultService()
-    uri = daemon.register(insult_service)  # Registrar InsultService
-    ns.register("example.insultservice", uri)  # Registrar en el Name Server con un nombre único
-
-    print("InsultService está funcionando...")
-    daemon.requestLoop()  # Mantener el servidor funcionando y esperando solicitudes
+    uri = daemon.register(insult_service)
+    ns.register("InsultService", uri)
+    print("InsultService está funcionando en el puerto 9093...")
+    daemon.requestLoop()
 
 if __name__ == "__main__":
-    run_insult_server()
+    Process(target=run_insult_server).start()
