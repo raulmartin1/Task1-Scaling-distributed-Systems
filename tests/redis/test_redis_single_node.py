@@ -78,10 +78,10 @@ def launch_service(script_name):
     threading.Thread(target=print_output, daemon=True).start()
     return proc  # Retorna el proces per poder controlar-lo despres
 
-# Funcio per tancar un procés enviant senyal SIGTERM
+# Funcio per tancar un proces enviant senyal SIGTERM
 def terminate_process(proc):
-    if proc.poll() is None:  # Si el procés està actiu
-        os.kill(proc.pid, signal.SIGTERM)  # Enviar senyal de terminació
+    if proc.poll() is None:  # Si el proces està actiu
+        os.kill(proc.pid, signal.SIGTERM)  # Enviar senyal de terminacio
         proc.wait()  # Esperem que es tanqui
 
 # Funció que executa el test complet amb un nombre concret de peticions (texts a filtrar)
@@ -129,7 +129,7 @@ def run_test(num_requests):
     print(f"Temps total per {num_requests} peticions: {duration:.2f} segons", flush=True)
     return duration
 
-# Funció principal que executa tests per diferents càrregues i fa una gràfica
+# Funció principal que executa tests per diferents carregues i fa una gràfica
 def main():
     peticions = [100, 500, 1000, 2000]  # Carregues de peticions
     temps = []  # Llista temps resultants
@@ -137,14 +137,14 @@ def main():
     for n in peticions:
         temps.append(run_test(n))  # Executar test per cada nombre de peticions i guardar el temps
 
-    # Crear i mostrar la gràfica de rendiment
+    # Crear i mostrar la grafica de rendiment
     plt.figure(figsize=(8,5))
     plt.plot(peticions, temps, marker='o')
     plt.title("Rendiment InsultService + InsultFilter (Single-node)")
     plt.xlabel("Nombre de peticions")
     plt.ylabel("Temps total (segons)")
     plt.grid(True)
-    plt.savefig("rendiment_redis_single_node.png")  # Guardar la gràfica a fitxer
+    plt.savefig("rendiment_redis_single_node.png")  # Guardar la grafica a fitxer
     plt.show()
 
 if __name__ == "__main__":

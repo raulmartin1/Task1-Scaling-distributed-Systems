@@ -165,11 +165,10 @@ def main():
             speedup = base / results[(nodes, load)]
             print(f"Nodes={nodes}, Càrrega={load}: Speedup={round(speedup, 2)}")
 
-    # Gràfiques: dues subplots, una per temps i una per speedup
-    import matplotlib.pyplot as plt
+    # Grafiques: dues subplots, una per temps i una per speedup
     plt.figure(figsize=(10, 10))  # Ample x alt
 
-    # Gràfica 1: Temps
+    # Grafica 1 -> Temps
     plt.subplot(2, 1, 1)  # 2 files, 1 columna, primera
     for load in loads:
         y = [results[(nodes, load)] for nodes in nodes_list]
@@ -180,7 +179,7 @@ def main():
     plt.grid(True)
     plt.legend()
 
-    # Gràfica 2: Speedups
+    # Grafica 2 -> Speedups
     plt.subplot(2, 1, 2)  # 2 files, 1 columna, segona
     for load in loads:
         y_speedup = [results[(1, load)] / results[(nodes, load)] for nodes in nodes_list]

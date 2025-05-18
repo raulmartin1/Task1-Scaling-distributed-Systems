@@ -1,7 +1,7 @@
 import subprocess
 import time
 import pika
-import os
+import os 
 import signal
 import matplotlib.pyplot as plt
 
@@ -9,6 +9,7 @@ QUEUE_NAME = 'insult_queue'
 RABBITMQ_HOST = 'localhost'
 
 def launch_service_silent(script_name):
+    # Llançem un proces python per executar un script dins la carpeta 'rabbitmq'
     return subprocess.Popen(
         ['python3', os.path.join('rabbitmq', script_name)],
         stdout=subprocess.DEVNULL,
@@ -16,11 +17,13 @@ def launch_service_silent(script_name):
     )
 
 def terminate_process(proc):
+    # Si el proces esta actiu, envia un senyal SIGTERM per finalitzar-lo i espera que acabi
     if proc.poll() is None:
         os.kill(proc.pid, signal.SIGTERM)
         proc.wait()
 
 def send_insults(n):
+    # Connecta amb rabbitmq i envia n insults a la cua
     connection = pika.BlockingConnection(pika.ConnectionParameters(RABBITMQ_HOST))
     channel = connection.channel()
     channel.queue_declare(queue=QUEUE_NAME)
@@ -28,13 +31,14 @@ def send_insults(n):
     insults = ["tonto", "bobo", "tortuga", "eres tonto", "eres muy bobo", "eres una tortuga"]
 
     for i in range(n):
-        insult = insults[i % len(insults)]
+        insult = insults[i % len(insults)]  # Selecciona insults ciclicament
         channel.basic_publish(exchange='', routing_key=QUEUE_NAME, body=insult)
 
     connection.close()
     print(f"Client: Enviats {n} insults a la cua.", flush=True)
 
 def wait_until_queue_empty(queue_name, timeout=60):
+    # Espera fins que la cua rabbitmq estigui buida o fins que s'acabi el timeout
     connection = pika.BlockingConnection(pika.ConnectionParameters(RABBITMQ_HOST))
     channel = connection.channel()
 
@@ -51,7 +55,7 @@ def wait_until_queue_empty(queue_name, timeout=60):
     connection.close()
 
 def main():
-    loads = [500, 1000, 2000]  # Cargas actualizadas
+    loads = [500, 1000, 2000]  # Diferentes carregues d'insults
     times = []
 
     for n in loads:
@@ -60,11 +64,11 @@ def main():
         insult_service_proc = launch_service_silent('insult_service.py')
         insult_filter_proc = launch_service_silent('insult_filter.py')
 
-        time.sleep(3)  # esperar que els serveis s'inicialitzin
+        time.sleep(3)  # Esperar que els serveis s'inicialitzin
 
         start_time = time.time()
         send_insults(n)
-        wait_until_queue_empty(QUEUE_NAME, timeout=120)  # Timeout más grande por carga más alta
+        wait_until_queue_empty(QUEUE_NAME, timeout=120)  # Timeout major per major carga
         end_time = time.time()
 
         duration = end_time - start_time

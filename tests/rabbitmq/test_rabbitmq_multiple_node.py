@@ -1,7 +1,7 @@
 import subprocess
 import time
 import multiprocessing
-import pika
+import pika 
 import os
 import signal
 import matplotlib.pyplot as plt
@@ -10,7 +10,7 @@ QUEUE_NAME = 'insult_queue'
 RABBITMQ_HOST = 'localhost'
 
 def launch_service_silent(script_name):
-    # Llança un procés en background sense mostrar sortida
+    # Es llança un proces python en background sense mostrar cap sortida
     return subprocess.Popen(
         ['python3', os.path.join('rabbitmq', script_name)],
         stdout=subprocess.DEVNULL,
@@ -18,13 +18,13 @@ def launch_service_silent(script_name):
     )
 
 def terminate_process(proc):
-    # Termina un procés si encara està actiu
+    # Terminem el proces si encara esta actiu
     if proc.poll() is None:
         os.kill(proc.pid, signal.SIGTERM)
         proc.wait()
 
 def send_insults_range(start, end):
-    # Connecta a RabbitMQ i envia insults de l'índex start fins a end
+    # Connecta a rabbit i envia insults des de l'index start fins a end-1
     connection = pika.BlockingConnection(pika.ConnectionParameters(RABBITMQ_HOST))
     channel = connection.channel()
     channel.queue_declare(queue=QUEUE_NAME)
@@ -32,12 +32,12 @@ def send_insults_range(start, end):
     insults = ["tonto", "bobo", "tortuga", "eres tonto", "eres muy bobo", "eres una tortuga"]
 
     for i in range(start, end):
-        insult = insults[i % len(insults)]
+        insult = insults[i % len(insults)]  # Selecciona insults ciclicament i el afegim
         channel.basic_publish(exchange='', routing_key=QUEUE_NAME, body=insult)
     connection.close()
 
 def wait_until_queue_empty(queue_name, timeout=120):
-    # Espera fins que la cua RabbitMQ estigui buida o fins a un timeout
+    # Espera fins que la cua rabbit estigui buida o fins que s'acabi el timeout
     connection = pika.BlockingConnection(pika.ConnectionParameters(RABBITMQ_HOST))
     channel = connection.channel()
 
@@ -54,12 +54,13 @@ def wait_until_queue_empty(queue_name, timeout=120):
     connection.close()
 
 def run_test(num_nodes, total_requests):
+    # Executa un test amb num_nodes i total_requests
     print("")
     print("Executant test amb nodes:", num_nodes, "i peticions totals:", total_requests)
 
     insult_service_procs = []
     insult_filter_procs = []
-    # Llança processos insult_service i insult_filter segons el nombre de nodes
+    # Llança els processos insult_service i insult_filter segons el nombre de nodes
     for _ in range(num_nodes):
         insult_service_procs.append(launch_service_silent('insult_service.py'))
         insult_filter_procs.append(launch_service_silent('insult_filter.py'))
@@ -70,7 +71,7 @@ def run_test(num_nodes, total_requests):
 
     processes = []
 
-    # Mesura el temps que triga a enviar tots els insults
+    # Mesura el temps d'enviament de tots els insults de forma paral·lela
     start_send = time.time()
     for i in range(num_nodes):
         start_idx = i * insults_per_node
@@ -98,12 +99,12 @@ def run_test(num_nodes, total_requests):
     return total_duration
 
 def main():
-    nodes_list = [1, 2, 3]
+    nodes_list = [1, 2, 3] 
     loads = [500, 1000, 2000]
 
     results = {}
 
-    # Executa el test per totes les combinacions de nodes i càrregues
+    # Executa el test per totes les combinacions de nodes i carreggues
     for load in loads:
         for nodes in nodes_list:
             duration = run_test(nodes, load)
@@ -112,13 +113,13 @@ def main():
     print("\nResultats de temps totals (enviament + filtratge):")
     for nodes in nodes_list:
         for load in loads:
-            print("Nodes:", nodes, "- Càrrega:", load, "- Temps (s):", results[(nodes, load)])
+            print("Nodes:", nodes, "- Carrega:", load, "- Temps (s):", results[(nodes, load)])
 
-    # Gràfica amb dos subplots, un a sobre de l'altre
+    # Grafica amb dos subplots: un de temps total i un de speedup respecte a 1 node
     plt.subplot(2, 1, 1)
     for load in loads:
         y = [results[(nodes, load)] for nodes in nodes_list]
-        plt.plot(nodes_list, y, marker='o', label=f"Càrrega {load}")
+        plt.plot(nodes_list, y, marker='o', label=f"Carrega {load}")
     plt.title("Temps total (segons)")
     plt.xlabel("Nombre de nodes")
     plt.ylabel("Temps (segons)")
@@ -128,7 +129,7 @@ def main():
     plt.subplot(2, 1, 2)
     for load in loads:
         y_speedup = [results[(1, load)] / results[(nodes, load)] for nodes in nodes_list]
-        plt.plot(nodes_list, y_speedup, marker='o', label=f"Càrrega {load}")
+        plt.plot(nodes_list, y_speedup, marker='o', label=f"Carrega {load}")
     plt.title("Speedup respecte a 1 node")
     plt.xlabel("Nombre de nodes")
     plt.ylabel("Speedup")
