@@ -27,7 +27,7 @@ def insult_filter():
             else:
                 print(f"InsultFilter: Text filtrat '{filtered_text}' ja es troba a la llista")
             
-        time.sleep(0.01)
+        #time.sleep(0.01)
 
 if __name__ == "__main__":
     insult_filter()

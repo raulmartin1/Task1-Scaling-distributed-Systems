@@ -80,7 +80,7 @@ def main():
 
     plt.figure(figsize=(8,5))
     plt.plot(loads, times, marker='o')
-    plt.title("Temps enviament + filtratge insults (sense modificar insult_filter.py)")
+    plt.title("Temps enviament + filtratge insults")
     plt.xlabel("Nombre d'insults enviats")
     plt.ylabel("Temps total (segons)")
     plt.grid(True)
